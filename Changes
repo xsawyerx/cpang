@@ -1,0 +1,9 @@
+0.02    11.07.10
+        [ All changes here by pancake ]
+        * Adding statusbar
+        * Terminal hidden by default
+        * Check for cpanm and sudo
+
+0.01    04.07.10
+        * 10 minutes of work, pretty sweet
+

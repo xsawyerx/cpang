@@ -7,6 +7,8 @@ use Gtk2 '-init';
 use Glib qw/ TRUE FALSE /;
 use Gnome2::Vte;
 
+our $VERSION = '0.02';
+
 # create a nice window
 my $window = Gtk2::Window->new;
 $window->set_title('cpang');
