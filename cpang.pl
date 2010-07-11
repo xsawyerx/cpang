@@ -19,7 +19,7 @@ $window->add($vbox);
 
 # create an hbox and put it in the vbox
 my $hbox = Gtk2::HBox->new( FALSE, 5 );
-$vbox->pack_start( $hbox, TRUE, TRUE, 5 );
+$vbox->pack_start( $hbox, FALSE, TRUE, 5 );
 
 # create a label and put it in the hbox
 my $label = Gtk2::Label->new('Module name:');
@@ -54,10 +54,37 @@ sub click {
     my $text = $entry->get_text() || q{};
     if ($text) {
         $entry->set_editable(0);
+        $entry->set_text('');
 
-        $terminal->fork_command(
-            'cpanm', [ 'cpanm', $text ], undef, '/tmp', FALSE, FALSE, FALSE
+        $terminal->show();
+        $status->pop (0);
+        $status->push (0, "Installing $text...");
+
+        my $cmd_result = $terminal->fork_command(
+            'cpanm', [ 'cpanm', $text ],
+            undef, '/tmp', FALSE, FALSE, FALSE,
         );
+
+        if ( $cmd_result == -1 ) {
+            my $cmd_result = $terminal->fork_command(
+                'sudo', [ 'sudo', 'cpan', '-i', $text ],
+                undef, '/tmp', FALSE, FALSE, FALSE,
+            );
+
+            if ( $cmd_result == -1 ) {
+                print STDERR "Cannot find 'cpanm' command\n";
+                my $dialog = Gtk2::MessageDialog->new(
+                    $window,
+                    'destroy-with-parent',
+                    'warning',
+                    'ok',
+                    'Cannot find "sudo", "cpan" or "cpanm" program',
+                );
+
+                $dialog->run;
+                $dialog->destroy;
+            }
+        }
     }
 }
 
