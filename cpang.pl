@@ -43,13 +43,16 @@ $scrollbar->set_adjustment( $terminal->get_adjustment );
 $vbox->pack_start( $terminal, TRUE, TRUE, 0 );
 $terminal->signal_connect( child_exited => sub { $entry->set_editable(1); } );
 
+my $status = Gtk2::Statusbar->new ();
+$vbox->pack_end ($status, FALSE, FALSE, 0);
 $window->show_all;
+$terminal->hide();
 Gtk2->main;
 
 sub click {
     my ($object) = @_;
     my $text = $entry->get_text() || q{};
-    if ( $text) {
+    if ($text) {
         $entry->set_editable(0);
 
         $terminal->fork_command(
