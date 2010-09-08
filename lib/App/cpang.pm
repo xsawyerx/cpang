@@ -10,13 +10,30 @@ our $VERSION = '0.03';
 
 sub new {
     my $class = shift;
+    my %opts  = @_;
+
     my $self  = bless {
-        main_window => Gtk2::Window->new,
+        main_window => $self->_create_main_window,
         terminal    => Gnome2::Vte::Terminal->new,
         vscrollbar  => Gtk2::VScrollbar->new,
         status      => Gtk2::Statusbar->new,
     }, $class;
     return $self;
+}
+
+sub _create_main_window {
+    my $self   = shift;
+    my $window = Gtk2::Window->new;
+
+    # create a nice window
+    $window->set_title('cpang'); # FIXME: make this configurable
+    $window->signal_connect(
+        destroy => sub { Gtk2->main_quit }
+    );
+
+    $window->set_border_width(5);
+
+    return $window;
 }
 
 sub run {
@@ -25,11 +42,6 @@ sub run {
     my $vscrollbar = $self->{'vscrollbar'};
     my $status     = $self->{'status'};
     my $window     = $self->{'main_window'};
-
-    # create a nice window
-    $window->set_title('cpang');
-    $window->signal_connect( destroy => sub { Gtk2->main_quit; } );
-    $window->set_border_width(5);
 
     # create a vbox and put it in the window
     my $vbox = Gtk2::VBox->new( FALSE, 5 );
