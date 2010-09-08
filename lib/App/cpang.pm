@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 package App::cpang;
+# ABSTRACT: CPAN GUI in Gtk2
 
 use Gtk2 '-init';
 use Glib qw/ TRUE FALSE /;
 use Gnome2::Vte;
-
-our $VERSION = '0.03';
 
 sub new {
     my $class = shift;
@@ -133,3 +132,53 @@ sub click {
 }
 
 1;
+
+__END__
+
+=head1 DESCRIPTION
+
+It's about time we have a GUI for I<cpan>. Apparently we're not that into GUI,
+but users are, so we need^Wshould care about it too.
+
+This is a rough draft of a basic cpan GUI. It uses L<App::cpanminus> instead of
+the basic I<cpan>. It's not pretty, but it's a start.
+
+You are B<more than welcome> to help me work this into a beautiful GUI
+application for users to use in order to search/install/test(?) modules and
+applications from CPAN.
+
+=head1 FOR USERS
+
+If you are a user, please check L<cpang> for how to use this.
+
+This paper describes the module behind the application.
+
+=head1 ATTRIBUTES
+
+These are the attributes available in C<new()>.
+
+=head2 title
+
+Sets the title of the main window.
+
+    use App::cpang;
+
+    my $app = App::cpang->new( title => 'MY MAIN TITLE!' );
+
+=head1 SUBROUTINES/METHODS
+
+=head2 new
+
+Surprisingly this creates a new object of type L<App::cpang>.
+
+=head2 run
+
+Packs everything and runs the application.
+
+    $app->run;
+
+=head3 click($event)
+
+Clicks on the "Install" step. This is bound to an event of the button in the
+interface.
+
