@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use App::cpang;
 
 {
@@ -20,5 +20,6 @@ use App::cpang;
 {
     my $cg = App::cpang->new( title => 'new' );
     is( $cg->{'title'}, 'new', 'Title is changable in new' );
+    is( $cg->{'_main_window'}->get_title, 'new', 'Title indeed changed' );
 }
 
