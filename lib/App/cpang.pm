@@ -13,18 +13,18 @@ sub new {
     my $self  = bless {
         main_window => Gtk2::Window->new,
         terminal    => Gnome2::Vte::Terminal->new,
-        scrollbar   => Gtk2::VScrollbar->new,
+        vscrollbar  => Gtk2::VScrollbar->new,
         status      => Gtk2::Statusbar->new,
     }, $class;
     return $self;
 }
 
 sub run {
-    my $self      = shift;
-    my $terminal  = $self->{'terminal'};
-    my $scrollbar = $self->{'scrollbar'};
-    my $status    = $self->{'status'};
-    my $window    = $self->{'main_window'};
+    my $self       = shift;
+    my $terminal   = $self->{'terminal'};
+    my $vscrollbar = $self->{'vscrollbar'};
+    my $status     = $self->{'status'};
+    my $window     = $self->{'main_window'};
 
     # create a nice window
     $window->set_title('cpang');
@@ -59,7 +59,7 @@ sub run {
     $hbox->pack_start( $button, FALSE, TRUE, 0 );
 
     # create a terminal and put it in the vbox too
-    $scrollbar->set_adjustment( $terminal->get_adjustment );
+    $vscrollbar->set_adjustment( $terminal->get_adjustment );
     $vbox->pack_start( $terminal, TRUE, TRUE, 0 );
     $terminal->signal_connect(
         child_exited => sub { $entry->set_editable(1) }
