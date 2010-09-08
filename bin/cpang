@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+package
+    cpang;
+
+use App::cpang;
+
+my $prog = App::cpang->new;
+
+exit $prog->run;
+
+__END__
+
