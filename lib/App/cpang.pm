@@ -13,11 +13,13 @@ sub new {
     my %opts  = @_;
 
     my $self  = bless {
-        main_window => $self->_create_main_window,
-        terminal    => Gnome2::Vte::Terminal->new,
-        vscrollbar  => Gtk2::VScrollbar->new,
-        status      => Gtk2::Statusbar->new,
+        _terminal    => Gnome2::Vte::Terminal->new,
+        _vscrollbar  => Gtk2::VScrollbar->new,
+        _status      => Gtk2::Statusbar->new,
     }, $class;
+
+    $self->{'_main_window'} = $self->_create_main_window,
+
     return $self;
 }
 
@@ -38,10 +40,10 @@ sub _create_main_window {
 
 sub run {
     my $self       = shift;
-    my $terminal   = $self->{'terminal'};
-    my $vscrollbar = $self->{'vscrollbar'};
-    my $status     = $self->{'status'};
-    my $window     = $self->{'main_window'};
+    my $terminal   = $self->{'_terminal'};
+    my $vscrollbar = $self->{'_vscrollbar'};
+    my $status     = $self->{'_status'};
+    my $window     = $self->{'_main_window'};
 
     # create a vbox and put it in the window
     my $vbox = Gtk2::VBox->new( FALSE, 5 );
@@ -85,9 +87,9 @@ sub run {
 
 sub click {
     my ( $self, $entry ) = @_;
-    my $status   = $self->{'status'};
-    my $terminal = $self->{'terminal'};
-    my $window   = $self->{'main_window'};
+    my $status   = $self->{'_status'};
+    my $terminal = $self->{'_terminal'};
+    my $window   = $self->{'_main_window'};
     my $text     = $entry->get_text() || q{};
 
     if ($text) {
