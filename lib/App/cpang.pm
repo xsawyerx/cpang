@@ -32,7 +32,7 @@ sub _create_main_window {
     my $window = Gtk2::Window->new;
 
     # create a nice window
-    $window->set_title('cpang'); # FIXME: make this configurable
+    $window->set_title( $self->{'title'} );
     $window->signal_connect(
         destroy => sub { Gtk2->main_quit }
     );
