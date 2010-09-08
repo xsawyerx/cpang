@@ -13,6 +13,10 @@ sub new {
     my %opts  = @_;
 
     my $self  = bless {
+        # public attributes
+        title        => $opts{'title'} || 'cpang',
+
+        # private attributes
         _terminal    => Gnome2::Vte::Terminal->new,
         _vscrollbar  => Gtk2::VScrollbar->new,
         _status      => Gtk2::Statusbar->new,
