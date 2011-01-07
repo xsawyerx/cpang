@@ -52,7 +52,7 @@ sub run_search {
     );
 #    $tree_widget->{data} is an ARRAYREF
 
-    $searchbox->get_text or return;
+    my $searchterm = $searchbox->get_text or return;
 
     #$resultslist->set_headers_clickable(1);
     foreach my $col ( $resultslist->get_columns() ) {
@@ -61,7 +61,7 @@ sub run_search {
     }
 
     my $sth = $dbh->prepare('SELECT DISTINCT distribution, module FROM module WHERE module LIKE ? ORDER BY distribution');
-    $sth->execute( '%' . $searchbox->get_text . '%' );
+    $sth->execute( "%$searchterm%" );
     my $arrayref = $sth->fetchall_arrayref;
 
     foreach my $distref ( @{$arrayref} ) {
