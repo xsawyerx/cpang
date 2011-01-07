@@ -9,7 +9,7 @@ package
 use Glib qw/TRUE FALSE/;
 use Gtk2 -init;
 use Gtk2::GladeXML;
-use Gtk2::SimpleList;
+use Gtk2::Ex::Simple::List;
 
 # additional modules
 use CPANDB;
@@ -41,7 +41,7 @@ sub run_search {
     }
 
     my $tree_widget = $gui->get_widget('searchresults');
-    my $resultslist = Gtk2::SimpleList->new_from_treeview(
+    my $resultslist = Gtk2::Ex::Simple::List->new_from_treeview(
         $tree_widget =>
         ''            => 'bool',
         'Dist name'   => 'text',
