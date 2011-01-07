@@ -21,7 +21,7 @@ use Data::Dump 'dd';
 my $gui = Gtk2::GladeXML->new( file( dist_dir('App-cpang'), 'cpang.glade' ) );
 my $dbh = CPANDB->dbh;
 
-$gui->signal_autoconnect_from_package('main');
+$gui->signal_autoconnect_from_package('cpang');
 
 Gtk2->main;
 
