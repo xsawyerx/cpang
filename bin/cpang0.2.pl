@@ -2,6 +2,8 @@
 
 use strict;
 use warnings;
+package
+    cpang;
 
 # Glib/Gtk stuff
 use Glib qw/TRUE FALSE/;
