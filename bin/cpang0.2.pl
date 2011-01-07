@@ -43,12 +43,12 @@ sub run_search {
     my $tree_widget = $gui->get_widget('searchresults');
     my $resultslist = Gtk2::SimpleList->new_from_treeview(
         $tree_widget =>
-        ''                  => 'bool',
-        'Dist name'         => 'text',
-        'Latest Version'    => 'text',
-        'Installed Version' => 'text',
-        'Author'            => 'text',
-        'Description'       => 'text',
+        ''            => 'bool',
+        'Dist name'   => 'text',
+        'Latest'      => 'text',
+        'Installed'   => 'text',
+        'Author'      => 'text',
+        'Description' => 'text',
     );
 #    $tree_widget->{data} is an ARRAYREF
 
