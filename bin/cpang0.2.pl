@@ -27,6 +27,8 @@ Gtk2->main;
 
 sub run_search {
     my $widget    = shift;
+    my $gui       = $self->gui;
+    my $dbh       = CPANDB->dbh;
     my $searchbox = $gui->get_widget('searchtextbox');
 
     # decide what kind of search we want

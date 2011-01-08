@@ -56,6 +56,8 @@ sub gtk_main_quit {
 sub run_search {
     my $self      = shift;
     my $widget    = shift;
+    my $gui       = $self->gui;
+    my $dbh       = CPANDB->dbh;
     my $searchbox = $gui->get_widget('searchtextbox');
 
     # decide what kind of search we want
