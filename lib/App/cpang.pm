@@ -31,7 +31,7 @@ has 'gui' => (
 
 sub _build_glade_path {
     my $self = shift;
-    return file( dist_dir(__PACKAGE__), 'cpang.glade' );
+    return file( dist_dir('App-cpang'), 'cpang.glade' );
 }
 
 sub _build_gui {
