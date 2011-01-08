@@ -11,7 +11,7 @@ use Any::Moose;
 
 has 'glade_path' => (
     is         => 'ro',
-    isa        => 'Str',
+    isa        => 'Path::Class::File',
     lazy_build => 1,
 );
 
@@ -20,6 +20,17 @@ has 'gui' => (
     isa        => 'Gtk2::GladeXML',
     lazy_build => 1,
 );
+
+sub _build_glade_path {
+    my $self = shift;
+    return file( dist_dir(__PACKAGE__), 'cpang.glade' );
+}
+
+sub _build_gui {
+    my $self  = shift;
+    my $glade = $self->glade_path;
+    return Gtk2::GladeXML->new($glade);
+}
 
 sub _create_main_window {
     my $self   = shift;
