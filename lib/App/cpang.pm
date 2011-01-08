@@ -83,24 +83,21 @@ sub run_search {
     );
 #    $tree_widget->{data} is an ARRAYREF
 
-    my $searchterm = $searchbox->get_text or return;
-
-    #$resultslist->set_headers_clickable(1);
     foreach my $col ( $resultslist->get_columns() ) {
         $col->set_resizable(1);
         $col->set_sizing('grow-only');
     }
 
-    my $sth = $dbh->prepare('SELECT DISTINCT distribution, module FROM module WHERE module LIKE ? ORDER BY distribution');
-    $sth->execute( "%$searchterm%" );
-    my $arrayref = $sth->fetchall_arrayref;
+    #$resultslist->set_headers_clickable(1);
+    my $searchterm = $searchbox->get_text or return;
+    my $results    = $self->fetch_results($searchterm);
 
-    foreach my $distref ( @{$arrayref} ) {
+    foreach my $distref ( @{$results} ) {
         my $distname   = shift @{$distref};
         my $modulename = shift @{$distref};
 
         # get dist information
-        $sth = $dbh->prepare('SELECT version, author FROM distribution WHERE distribution = ?');
+        my $sth = $dbh->prepare('SELECT version, author FROM distribution WHERE distribution = ?');
         $sth->execute($distname);
         my $distdata = $sth->fetchrow_arrayref;
 
@@ -123,6 +120,19 @@ sub run_search {
 
     $resultslist->select(0);
 }
+
+sub fetch_results {
+    my $self = shift;
+    my $term = shift;
+    my $dbh  = CPANDB->dbh;
+
+    my $sth = $dbh->prepare('SELECT DISTINCT distribution, module FROM module WHERE module LIKE ? ORDER BY distribution');
+    $sth->execute( "%$term%" );
+    my $arrayref = $sth->fetchall_arrayref;
+
+    return $arrayref;
+}
+
 
 1;
 
