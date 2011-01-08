@@ -71,7 +71,6 @@ sub run_search {
         'Author'      => 'text',
         'Description' => 'text',
     );
-#    $tree_widget->{data} is an ARRAYREF
 
     foreach my $col ( $resultslist->get_columns() ) {
         $col->set_resizable(1);
