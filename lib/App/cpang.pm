@@ -3,132 +3,125 @@ use warnings;
 package App::cpang;
 # ABSTRACT: CPAN GUI in Gtk2
 
-use Gtk2 '-init';
-use Glib qw/ TRUE FALSE /;
-use Gnome2::Vte;
+use Any::Moose;
 
-sub new {
-    my $class = shift;
-    my %opts  = @_;
+# Glib/Gtk stuff
+use Glib qw/TRUE FALSE/;
+use Gtk2 -init;
+use Gtk2::GladeXML;
+use Gtk2::Ex::Simple::List;
 
-    my $self  = bless {
-        # public attributes
-        title        => $opts{'title'} || 'cpang',
+# additional modules
+use CPANDB;
+use Path::Class;
+use File::ShareDir 'dist_dir';
+use Module::Version 'get_version';
 
-        # private attributes
-        _terminal    => Gnome2::Vte::Terminal->new,
-        _vscrollbar  => Gtk2::VScrollbar->new,
-        _status      => Gtk2::Statusbar->new,
-    }, $class;
+has 'glade_path' => (
+    is         => 'ro',
+    isa        => 'Path::Class::File',
+    lazy_build => 1,
+);
 
-    $self->{'_main_window'} = $self->_create_main_window,
+has 'gui' => (
+    is         => 'ro',
+    isa        => 'Gtk2::GladeXML',
+    lazy_build => 1,
+);
 
-    return $self;
+sub _build_glade_path {
+    my $self = shift;
+    return file( dist_dir('App-cpang'), 'cpang.glade' );
 }
 
-sub _create_main_window {
-    my $self   = shift;
-    my $window = Gtk2::Window->new;
+sub _build_gui {
+    my $self  = shift;
+    my $glade = $self->glade_path;
+    return Gtk2::GladeXML->new($glade);
+}
 
-    # create a nice window
-    $window->set_title( $self->{'title'} );
-    $window->signal_connect(
-        destroy => sub { Gtk2->main_quit }
-    );
-
-    $window->set_border_width(5);
-
-    return $window;
+sub BUILD {
+    my $self = shift;
+    $self->gui->signal_autoconnect_from_package($self);
 }
 
 sub run {
-    my $self       = shift;
-    my $terminal   = $self->{'_terminal'};
-    my $vscrollbar = $self->{'_vscrollbar'};
-    my $status     = $self->{'_status'};
-    my $window     = $self->{'_main_window'};
-
-    # create a vbox and put it in the window
-    my $vbox = Gtk2::VBox->new( FALSE, 5 );
-    $window->add($vbox);
-
-    # create an hbox and put it in the vbox
-    my $hbox = Gtk2::HBox->new( FALSE, 5 );
-    $vbox->pack_start( $hbox, FALSE, TRUE, 5 );
-
-    # create a label and put it in the hbox
-    my $label = Gtk2::Label->new('Module name:');
-    $hbox->pack_start( $label, FALSE, TRUE, 0 );
-
-    # create an entry (textbox) and put it in the hbox
-    my $entry = Gtk2::Entry->new;
-    $entry->signal_connect(
-        'activate' => sub { $self->click( $entry ) }
-    );
-
-    $hbox->pack_start( $entry, TRUE, TRUE, 0 );
-
-    # create a button and put it in the hbox
-    my $button = Gtk2::Button->new('Install');
-    $button->signal_connect(
-        clicked => sub { $self->click( $entry ) }
-    );
-    $hbox->pack_start( $button, FALSE, TRUE, 0 );
-
-    # create a terminal and put it in the vbox too
-    $vscrollbar->set_adjustment( $terminal->get_adjustment );
-    $vbox->pack_start( $terminal, TRUE, TRUE, 0 );
-    $terminal->signal_connect(
-        child_exited => sub { $entry->set_editable(1) }
-    );
-
-    $vbox->pack_end ($status, FALSE, FALSE, 0);
-    $window->show_all;
-    $terminal->hide();
     Gtk2->main;
 }
 
-sub click {
-    my ( $self, $entry ) = @_;
-    my $status   = $self->{'_status'};
-    my $terminal = $self->{'_terminal'};
-    my $window   = $self->{'_main_window'};
-    my $text     = $entry->get_text() || q{};
+sub gtk_main_quit {
+    Gtk2->main_quit;
+}
 
-    if ($text) {
-        $entry->set_editable(0);
-        $entry->set_text('');
+sub run_search {
+    my $self      = shift;
+    my $widget    = shift;
+    my $gui       = $self->gui;
+    my $dbh       = CPANDB->dbh;
+    my $searchbox = $gui->get_widget('searchtextbox');
 
-        $terminal->show();
-        $status->pop (0);
-        $status->push (0, "Installing $text...");
-
-        my $cmd_result = $terminal->fork_command(
-            'cpanm', [ 'cpanm', $text ],
-            undef, '/tmp', FALSE, FALSE, FALSE,
-        );
-
-        if ( $cmd_result == -1 ) {
-            my $cmd_result = $terminal->fork_command(
-                'sudo', [ 'sudo', 'cpan', '-i', $text ],
-                undef, '/tmp', FALSE, FALSE, FALSE,
-            );
-
-            if ( $cmd_result == -1 ) {
-                print STDERR "Cannot find 'cpanm' command\n";
-                my $dialog = Gtk2::MessageDialog->new(
-                    $window,
-                    'destroy-with-parent',
-                    'warning',
-                    'ok',
-                    'Cannot find "sudo", "cpan" or "cpanm" program',
-                );
-
-                $dialog->run;
-                $dialog->destroy;
-            }
-        }
+    # decide what kind of search we want
+    my $widget_name = $widget->get_name();
+    if ( $widget_name eq 'distbutton' ) {
+        # we want a dist search
+    } elsif ( $widget_name eq 'authorbutton' ) {
+        # we want an author search
+    } else {
+        # we want a dist search
+        # TODO: default
     }
+
+    my $tree_widget = $gui->get_widget('searchresults');
+    my $resultslist = Gtk2::Ex::Simple::List->new_from_treeview(
+        $tree_widget =>
+        ''            => 'bool',
+        'Dist name'   => 'text',
+        'Latest'      => 'text',
+        'Installed'   => 'text',
+        'Author'      => 'text',
+        'Description' => 'text',
+    );
+#    $tree_widget->{data} is an ARRAYREF
+
+    my $searchterm = $searchbox->get_text or return;
+
+    #$resultslist->set_headers_clickable(1);
+    foreach my $col ( $resultslist->get_columns() ) {
+        $col->set_resizable(1);
+        $col->set_sizing('grow-only');
+    }
+
+    my $sth = $dbh->prepare('SELECT DISTINCT distribution, module FROM module WHERE module LIKE ? ORDER BY distribution');
+    $sth->execute( "%$searchterm%" );
+    my $arrayref = $sth->fetchall_arrayref;
+
+    foreach my $distref ( @{$arrayref} ) {
+        my $distname   = shift @{$distref};
+        my $modulename = shift @{$distref};
+
+        # get dist information
+        $sth = $dbh->prepare('SELECT version, author FROM distribution WHERE distribution = ?');
+        $sth->execute($distname);
+        my $distdata = $sth->fetchrow_arrayref;
+
+        my ( $latest_version, $author_id ) = $distdata    ?
+                                             @{$distdata} :
+                                             ( 'no info', 'no info' );
+
+        my $installed_version = get_version($modulename);
+
+        push @{ $resultslist->{'data'} },
+            [
+                FALSE,
+                $modulename,
+                $latest_version,
+                $installed_version,
+                $author_id,
+                'A postmodern object system for Perl 5',
+            ];
+    }
+
+    $resultslist->select(0);
 }
 
 1;
