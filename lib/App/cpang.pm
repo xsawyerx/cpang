@@ -15,7 +15,7 @@ use Gtk2::Ex::Simple::List;
 use CPANDB;
 use CPANDB::Distribution;
 use Path::Class;
-use File::ShareDir 'dist_dir';
+use File::ShareDir  'dist_dir';
 use Module::Version 'get_version';
 
 has 'glade_path' => (
@@ -117,13 +117,14 @@ sub fetch_results {
     my $self    = shift;
     my $term    = shift;
     my $dbh     = CPANDB->dbh;
+    my %saw     = ();
     my @results = ();
 
     push @results, $self->fetch_main_dist($term);
     push @results, $self->fetch_starting_dists($term);
     push @results, $self->fetch_ending_dists($term);
 
-    return @results;
+    return grep { ! $saw{ $_->distribution }++ } @results;
 }
 
 sub fetch_main_dist {
