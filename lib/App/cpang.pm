@@ -45,6 +45,10 @@ sub BUILD {
     $self->gui->signal_autoconnect_from_package(__PACKAGE__);
 }
 
+sub run {
+    Gtk2->main;
+}
+
 1;
 
 __END__
