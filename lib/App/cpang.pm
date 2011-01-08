@@ -13,6 +13,7 @@ use Gtk2::Ex::Simple::List;
 
 # additional modules
 use CPANDB;
+use CPANDB::Distribution;
 use Path::Class;
 use File::ShareDir 'dist_dir';
 use Module::Version 'get_version';
@@ -90,30 +91,21 @@ sub run_search {
 
     #$resultslist->set_headers_clickable(1);
     my $searchterm = $searchbox->get_text or return;
-    my $results    = $self->fetch_results($searchterm);
+    my @results    = $self->fetch_results($searchterm);
 
-    foreach my $distref ( @{$results} ) {
-        my $distname   = shift @{$distref};
-        my $modulename = shift @{$distref};
+    foreach my $dist (@results) {
+        my $module = $dist;
+        $module =~ s{-}{::}g;
 
-        # get dist information
-        my $sth = $dbh->prepare('SELECT version, author FROM distribution WHERE distribution = ?');
-        $sth->execute($distname);
-        my $distdata = $sth->fetchrow_arrayref;
-
-        my ( $latest_version, $author_id ) = $distdata    ?
-                                             @{$distdata} :
-                                             ( 'no info', 'no info' );
-
-        my $installed_version = get_version($modulename);
+        my $installed = get_version($module);
 
         push @{ $resultslist->{'data'} },
             [
                 FALSE,
-                $modulename,
-                $latest_version,
-                $installed_version,
-                $author_id,
+                $dist->distribution,
+                $dist->version || 'no info',
+                $installed     || '',
+                $dist->author  || 'no info',
                 'A postmodern object system for Perl 5',
             ];
     }
@@ -122,17 +114,49 @@ sub run_search {
 }
 
 sub fetch_results {
-    my $self = shift;
-    my $term = shift;
-    my $dbh  = CPANDB->dbh;
+    my $self    = shift;
+    my $term    = shift;
+    my $dbh     = CPANDB->dbh;
+    my @results = ();
 
-    my $sth = $dbh->prepare('SELECT DISTINCT distribution, module FROM module WHERE module LIKE ? ORDER BY distribution');
-    $sth->execute( "%$term%" );
-    my $arrayref = $sth->fetchall_arrayref;
+    push @results, $self->fetch_main_dist($term);
+    push @results, $self->fetch_starting_dists($term);
+    push @results, $self->fetch_ending_dists($term);
 
-    return $arrayref;
+    return @results;
 }
 
+sub fetch_main_dist {
+    my $self = shift;
+    my $term = shift;
+    my $dist = CPANDB->distribution($term);
+
+    return $dist;
+}
+
+sub fetch_starting_dists {
+    my $self = shift;
+    my $term = shift;
+
+    my @starting_with = CPANDB::Distribution->select(
+        'where distribution LIKE ? order by distribution',
+        "$term%",
+    );
+
+    return @starting_with;
+}
+
+sub fetch_ending_dists {
+    my $self = shift;
+    my $term = shift;
+
+    my @ending_with = CPANDB::Distribution->select(
+        'where distribution LIKE ? order by distribution',
+        "\%$term",
+    );
+
+    return @ending_with;
+}
 
 1;
 
