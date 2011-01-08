@@ -116,15 +116,13 @@ sub run_search {
 sub fetch_results {
     my $self    = shift;
     my $term    = shift;
-    my $dbh     = CPANDB->dbh;
     my %saw     = ();
-    my @results = ();
+    my @results = grep { ! $saw{ $_->distribution }++ }
+                      $self->fetch_main_dist($term),
+                      $self->fetch_starting_dists($term),
+                      $self->fetch_ending_dists($term);
 
-    push @results, $self->fetch_main_dist($term);
-    push @results, $self->fetch_starting_dists($term);
-    push @results, $self->fetch_ending_dists($term);
-
-    return grep { ! $saw{ $_->distribution }++ } @results;
+    return @results;
 }
 
 sub fetch_main_dist {
