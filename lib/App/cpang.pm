@@ -7,24 +7,19 @@ use Gtk2 '-init';
 use Glib qw/ TRUE FALSE /;
 use Gnome2::Vte;
 
-sub new {
-    my $class = shift;
-    my %opts  = @_;
+use Any::Moose;
 
-    my $self  = bless {
-        # public attributes
-        title        => $opts{'title'} || 'cpang',
+has 'glade_path' => (
+    is         => 'ro',
+    isa        => 'Str',
+    lazy_build => 1,
+);
 
-        # private attributes
-        _terminal    => Gnome2::Vte::Terminal->new,
-        _vscrollbar  => Gtk2::VScrollbar->new,
-        _status      => Gtk2::Statusbar->new,
-    }, $class;
-
-    $self->{'_main_window'} = $self->_create_main_window,
-
-    return $self;
-}
+has 'gui' => (
+    is         => 'ro',
+    isa        => 'Gtk2::GladeXML',
+    lazy_build => 1,
+);
 
 sub _create_main_window {
     my $self   = shift;
