@@ -42,7 +42,7 @@ sub _build_gui {
 
 sub BUILD {
     my $self = shift;
-    $self->gui->signal_autoconnect_from_package(__PACKAGE__);
+    $self->gui->signal_autoconnect_from_package($self);
 }
 
 sub run {
