@@ -3,11 +3,19 @@ use warnings;
 package App::cpang;
 # ABSTRACT: CPAN GUI in Gtk2
 
-use Gtk2 '-init';
-use Glib qw/ TRUE FALSE /;
-use Gnome2::Vte;
-
 use Any::Moose;
+
+# Glib/Gtk stuff
+use Glib qw/TRUE FALSE/;
+use Gtk2 -init;
+use Gtk2::GladeXML;
+use Gtk2::Ex::Simple::List;
+
+# additional modules
+use CPANDB;
+use Path::Class;
+use File::ShareDir 'dist_dir';
+use Module::Version 'get_version';
 
 has 'glade_path' => (
     is         => 'ro',
