@@ -55,13 +55,12 @@ sub gtk_main_quit {
 }
 
 sub run_search {
-    my $self      = shift;
-    my $widget    = shift;
-    my $gui       = $self->gui;
-    my $dbh       = CPANDB->dbh;
-    my $searchbox = $gui->get_widget('searchtextbox');
-
+    my $self        = shift;
+    my $widget      = shift;
+    my $gui         = $self->gui;
+    my $searchbox   = $gui->get_widget('searchtextbox');
     my $tree_widget = $gui->get_widget('searchresults');
+
     my $resultslist = Gtk2::Ex::Simple::List->new_from_treeview(
         $tree_widget =>
         ''            => 'bool',
