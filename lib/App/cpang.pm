@@ -32,6 +32,11 @@ sub _build_gui {
     return Gtk2::GladeXML->new($glade);
 }
 
+sub BUILD {
+    my $self = shift;
+    $self->gui->signal_autoconnect_from_package(__PACKAGE__);
+}
+
 sub _create_main_window {
     my $self   = shift;
     my $window = Gtk2::Window->new;
