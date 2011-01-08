@@ -176,6 +176,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="border_width">10</property>
+                    <signal name="clicked" handler="run_search"/>
                     <child>
                       <widget class="GtkAlignment" id="alignment1">
                         <property name="visible">True</property>
