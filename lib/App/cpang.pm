@@ -49,6 +49,10 @@ sub run {
     Gtk2->main;
 }
 
+sub gtk_main_quit {
+    Gtk2->main_quit;
+}
+
 1;
 
 __END__
