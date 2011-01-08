@@ -61,17 +61,6 @@ sub run_search {
     my $dbh       = CPANDB->dbh;
     my $searchbox = $gui->get_widget('searchtextbox');
 
-    # decide what kind of search we want
-    my $widget_name = $widget->get_name();
-    if ( $widget_name eq 'distbutton' ) {
-        # we want a dist search
-    } elsif ( $widget_name eq 'authorbutton' ) {
-        # we want an author search
-    } else {
-        # we want a dist search
-        # TODO: default
-    }
-
     my $tree_widget = $gui->get_widget('searchresults');
     my $resultslist = Gtk2::Ex::Simple::List->new_from_treeview(
         $tree_widget =>
