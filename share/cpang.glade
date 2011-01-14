@@ -259,7 +259,7 @@
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
-                      <widget class="GtkTreeView" id="treeview2">
+                      <widget class="GtkTextView" id="docview">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </widget>
