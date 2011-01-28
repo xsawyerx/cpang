@@ -17,6 +17,7 @@ use CPANDB::Distribution;
 use Path::Class;
 use File::ShareDir  'dist_dir';
 use Module::Version 'get_version';
+use MetaCPAN::API;
 
 has 'glade_path' => (
     is         => 'ro',
@@ -30,6 +31,12 @@ has 'gui' => (
     lazy_build => 1,
 );
 
+has 'mcpan' => (
+    is         => 'ro',
+    isa        => 'MetaCPAN::API',
+    lazy_build => 1,
+);
+
 sub _build_glade_path {
     my $self = shift;
     return file( dist_dir('App-cpang'), 'cpang.glade' );
@@ -39,6 +46,10 @@ sub _build_gui {
     my $self  = shift;
     my $glade = $self->glade_path;
     return Gtk2::GladeXML->new($glade);
+}
+
+sub _build_mcpan {
+    return MetaCPAN::API->new();
 }
 
 sub BUILD {
