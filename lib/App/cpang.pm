@@ -13,7 +13,6 @@ use Gtk2::Ex::Simple::List;
 
 # additional modules
 use Try::Tiny;
-use CPANDB::Distribution;
 use Path::Class;
 use File::ShareDir  'dist_dir';
 use Module::Version 'get_version';
@@ -118,50 +117,6 @@ sub run_search {
     }
 
     $resultslist->select(0);
-}
-
-sub fetch_results {
-    my $self    = shift;
-    my $term    = shift;
-    my %saw     = ();
-    my @results = grep { ! $saw{ $_->distribution }++ }
-                      $self->fetch_main_dist($term),
-                      $self->fetch_starting_dists($term),
-                      $self->fetch_ending_dists($term);
-
-    return @results;
-}
-
-sub fetch_main_dist {
-    my $self = shift;
-    my $term = shift;
-    my $dist = CPANDB->distribution($term);
-
-    return $dist;
-}
-
-sub fetch_starting_dists {
-    my $self = shift;
-    my $term = shift;
-
-    my @starting_with = CPANDB::Distribution->select(
-        'where distribution LIKE ? order by distribution',
-        "$term%",
-    );
-
-    return @starting_with;
-}
-
-sub fetch_ending_dists {
-    my $self = shift;
-    my $term = shift;
-
-    my @ending_with = CPANDB::Distribution->select(
-        'where distribution LIKE ? order by distribution',
-        "\%$term",
-    );
-
-    return @ending_with;
 }
 
 1;
