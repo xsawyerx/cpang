@@ -68,6 +68,7 @@ sub run_search {
     my $self        = shift;
     my $widget      = shift;
     my $gui         = $self->gui;
+    my $mcpan       = $self->mcpan;
     my $searchbox   = $gui->get_widget('searchtextbox');
     my $tree_widget = $gui->get_widget('searchresults');
 
@@ -92,8 +93,8 @@ sub run_search {
 
     try {
         # search for the dist
-        push @hits, $self->mcpan->search_dist($searchterm),
-                    $self->mcpan->search_module($searchterm);
+        push @hits, $mcpan->search_dist($searchterm),
+                    $mcpan->search_module($searchterm);
     } catch {
         # XXX: obviously do something better than this
         print STDERR "MetaCPAN Search problem: $_\n" .
