@@ -12,7 +12,7 @@ use Gtk2::GladeXML;
 use Gtk2::Ex::Simple::List;
 
 # additional modules
-use CPANDB;
+use Try::Tiny;
 use CPANDB::Distribution;
 use Path::Class;
 use File::ShareDir  'dist_dir';
@@ -89,22 +89,31 @@ sub run_search {
 
     #$resultslist->set_headers_clickable(1);
     my $searchterm = $searchbox->get_text or return;
-    my @results    = $self->fetch_results($searchterm);
+    my @hits       = ();
 
-    foreach my $dist (@results) {
-        my $module = $dist;
-        $module =~ s{-}{::}g;
+    try {
+        # search for the dist
+        push @hits, $self->mcpan->search_dist($searchterm),
+                    $self->mcpan->search_module($searchterm);
+    } catch {
+        # XXX: obviously do something better than this
+        print STDERR "MetaCPAN Search problem: $_\n" .
+                     "Perhaps you're offline?\n";
+        return;
+    };
 
+    foreach my $dist (@hits) {
+        my $module    = $dist->{'_id'};
         my $installed = get_version($module);
 
         push @{ $resultslist->{'data'} },
             [
                 FALSE,
-                $dist->distribution,
-                $dist->version || 'no info',
-                $installed     || '',
-                $dist->author  || 'no info',
-                'A postmodern object system for Perl 5',
+                $dist->{'_source'}{'distname'},
+                $dist->{'_source'}{'version'} || 'no info',
+                $installed                    || '',
+                $dist->{'_source'}{'author'}  || 'no info',
+                $dist->{'_source'}{'abstract'},
             ];
     }
 
