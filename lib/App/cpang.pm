@@ -103,17 +103,17 @@ sub run_search {
     };
 
     foreach my $dist (@hits) {
-        my $module    = $dist->{'_id'};
-        my $installed = get_version($module);
+        my $data = $dist->{'_source'};
+        my $installed = get_version( $dist->{'_id'} );
 
         push @{ $resultslist->{'data'} },
             [
                 FALSE,
-                $dist->{'_source'}{'distname'},
-                $dist->{'_source'}{'version'} || 'no info',
-                $installed                    || '',
-                $dist->{'_source'}{'author'}  || 'no info',
-                $dist->{'_source'}{'abstract'},
+                $data->{'distname'},
+                $data->{'version'} || 'no info',
+                $installed         || '',
+                $data->{'author'}  || 'no info',
+                $data->{'abstract'},
             ];
     }
 
