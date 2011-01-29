@@ -14,9 +14,9 @@ use Gtk2::Ex::Simple::List;
 # additional modules
 use Try::Tiny;
 use Path::Class;
+use MetaCPAN::API;
 use File::ShareDir  'dist_dir';
 use Module::Version 'get_version';
-use MetaCPAN::API;
 
 has 'glade_path' => (
     is         => 'ro',
