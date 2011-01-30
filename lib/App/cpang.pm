@@ -12,9 +12,9 @@ use Gtk2::GladeXML;
 use Gtk2::Ex::Simple::List;
 
 # additional modules
-use CPANDB;
-use CPANDB::Distribution;
+use Try::Tiny;
 use Path::Class;
+use MetaCPAN::API;
 use File::ShareDir  'dist_dir';
 use Module::Version 'get_version';
 
@@ -30,6 +30,12 @@ has 'gui' => (
     lazy_build => 1,
 );
 
+has 'mcpan' => (
+    is         => 'ro',
+    isa        => 'MetaCPAN::API',
+    lazy_build => 1,
+);
+
 sub _build_glade_path {
     my $self = shift;
     return file( dist_dir('App-cpang'), 'cpang.glade' );
@@ -39,6 +45,10 @@ sub _build_gui {
     my $self  = shift;
     my $glade = $self->glade_path;
     return Gtk2::GladeXML->new($glade);
+}
+
+sub _build_mcpan {
+    return MetaCPAN::API->new();
 }
 
 sub BUILD {
@@ -58,6 +68,7 @@ sub run_search {
     my $self        = shift;
     my $widget      = shift;
     my $gui         = $self->gui;
+    my $mcpan       = $self->mcpan;
     my $searchbox   = $gui->get_widget('searchtextbox');
     my $tree_widget = $gui->get_widget('searchresults');
 
@@ -78,70 +89,35 @@ sub run_search {
 
     #$resultslist->set_headers_clickable(1);
     my $searchterm = $searchbox->get_text or return;
-    my @results    = $self->fetch_results($searchterm);
+    my @hits       = ();
 
-    foreach my $dist (@results) {
-        my $module = $dist;
-        $module =~ s{-}{::}g;
+    try {
+        # search for the dist
+        push @hits, $mcpan->search_dist($searchterm),
+                    $mcpan->search_module($searchterm);
+    } catch {
+        # XXX: obviously do something better than this
+        print STDERR "MetaCPAN Search problem: $_\n" .
+                     "Perhaps you're offline?\n";
+        return;
+    };
 
-        my $installed = get_version($module);
+    foreach my $dist (@hits) {
+        my $data = $dist->{'_source'};
+        my $installed = get_version( $dist->{'_id'} );
 
         push @{ $resultslist->{'data'} },
             [
                 FALSE,
-                $dist->distribution,
-                $dist->version || 'no info',
-                $installed     || '',
-                $dist->author  || 'no info',
-                'A postmodern object system for Perl 5',
+                $data->{'distname'},
+                $data->{'version'} || 'no info',
+                $installed         || '',
+                $data->{'author'}  || 'no info',
+                $data->{'abstract'},
             ];
     }
 
     $resultslist->select(0);
-}
-
-sub fetch_results {
-    my $self    = shift;
-    my $term    = shift;
-    my %saw     = ();
-    my @results = grep { ! $saw{ $_->distribution }++ }
-                      $self->fetch_main_dist($term),
-                      $self->fetch_starting_dists($term),
-                      $self->fetch_ending_dists($term);
-
-    return @results;
-}
-
-sub fetch_main_dist {
-    my $self = shift;
-    my $term = shift;
-    my $dist = CPANDB->distribution($term);
-
-    return $dist;
-}
-
-sub fetch_starting_dists {
-    my $self = shift;
-    my $term = shift;
-
-    my @starting_with = CPANDB::Distribution->select(
-        'where distribution LIKE ? order by distribution',
-        "$term%",
-    );
-
-    return @starting_with;
-}
-
-sub fetch_ending_dists {
-    my $self = shift;
-    my $term = shift;
-
-    my @ending_with = CPANDB::Distribution->select(
-        'where distribution LIKE ? order by distribution',
-        "\%$term",
-    );
-
-    return @ending_with;
 }
 
 1;
