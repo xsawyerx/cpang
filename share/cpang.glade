@@ -321,6 +321,7 @@
         <child>
           <widget class="GtkProgressBar" id="progressbar1">
             <property name="visible">True</property>
+            <property name="activity_mode">True</property>
           </widget>
           <packing>
             <property name="expand">False</property>
